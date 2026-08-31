@@ -44,3 +44,46 @@ python .\src\main.py
 ```text
 任务追踪器已启动
 ```
+
+## 开发方式
+
+每次开始新任务前，先切换到主分支并同步远程更新：
+
+```powershell
+git switch main
+git pull
+```
+
+为本次任务创建并切换到独立分支：
+
+```powershell
+git switch -c <branch-name>
+```
+
+修改文件后，检查仓库状态和具体差异：
+
+```powershell
+git status
+git diff
+```
+
+选择要提交的文件，并检查暂存区中的内容：
+
+```powershell
+git add <file>
+git diff --staged
+```
+
+确认改动无误后，创建含义清楚的本地提交：
+
+```powershell
+git commit -m "<type>: <description>"
+```
+
+第一次推送新分支时，设置它跟踪对应的远程分支：
+
+```powershell
+git push -u origin <branch-name>
+```
+
+后续可以使用 `git push` 推送新的本地提交，使用 `git pull` 获取并整合远程更新。
