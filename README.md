@@ -17,7 +17,7 @@ Python Task Tracker 是一个使用 Python 开发的命令行任务追踪器。
 
 ## 当前状态
 
-项目目前已完成基础目录初始化，并能够运行最小 Python 入口。
+项目目前已经实现基于 JSON 文件持久化的三个基础命令：添加任务、列出任务和删除任务。
 
 ## 目录结构
 
@@ -25,8 +25,11 @@ Python Task Tracker 是一个使用 Python 开发的命令行任务追踪器。
 python-task-tracker/
 ├── .venv/           # 项目的本地 Python 虚拟环境，不提交到 Git
 ├── src/             # 存放正式源代码
-│   └── main.py      # 当前程序入口
+│   ├── main.py      # CLI 入口与命令分发
+│   ├── task.py      # Task 数据模型
+│   └── storage.py   # JSON 文件读取与保存
 ├── tests/           # 存放自动化测试代码
+├── tasks.json       # 运行时任务数据，不提交到 Git
 ├── .gitignore       # 声明 Git 不需要追踪的文件
 └── README.md        # 项目说明文档
 ```
@@ -39,11 +42,28 @@ python-task-tracker/
 python .\src\main.py
 ```
 
-当前程序会输出：
+可用命令：
+
+```powershell
+python .\src\main.py add "学习 Python 模块"
+python .\src\main.py list
+python .\src\main.py delete 1
+```
+
+## 手动验收记录
 
 ```text
-任务追踪器已启动
+> python .\src\main.py add "学习 Python 模块"
+已添加任务: [1] 学习 Python 模块
+
+> python .\src\main.py list
+[1] 学习 Python 模块
+
+> python .\src\main.py delete 1
+已删除任务: [1] 学习 Python 模块
 ```
+
+删除后，`tasks.json` 中保存的是空列表 `[]`。
 
 ## 开发方式
 
