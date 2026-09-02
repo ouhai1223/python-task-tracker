@@ -6,6 +6,10 @@ from pathlib import Path
 from task import Task
 
 
+class StorageError(Exception):
+    pass
+
+
 DATA_FILE = Path(__file__).resolve().parent.parent / "tasks.json"
 
 
@@ -14,7 +18,10 @@ def load_tasks():
         return []
 
     with DATA_FILE.open("r", encoding="utf-8") as file:
-        data = json.load(file)
+        try:
+            data = json.load(file)
+        except json.JSONDecodeError as error:
+            raise StorageError("tasks.json 文件已损坏，无法读取") from error
 
     tasks = []
 

@@ -2,7 +2,7 @@
 
 import sys
 
-from storage import load_tasks, save_tasks
+from storage import StorageError, load_tasks, save_tasks
 from task import Task
 
 
@@ -69,7 +69,12 @@ def main():
             print("错误: add 命令需要任务标题")
             return
 
-        add_task(sys.argv[2])
+        title = sys.argv[2]
+        title = title.strip()
+        if not title:
+            print("错误: 任务标题不能为空")
+            return
+        add_task(title)
 
     elif command == "list":
         list_tasks()
@@ -93,4 +98,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except StorageError as error:
+        print(f"错误: {error}")
+        sys.exit(1)
