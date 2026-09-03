@@ -13,7 +13,7 @@ class StorageError(Exception):
 DATA_FILE = Path(__file__).resolve().parent.parent / "tasks.json"
 
 
-def load_tasks():
+def load_tasks() -> list[Task]:
     if not DATA_FILE.exists():
         return []
 
@@ -32,8 +32,8 @@ def load_tasks():
     return tasks
 
 
-def save_tasks(tasks):
-    data = [
+def save_tasks(tasks: list[Task]) -> None:
+    data: list[dict[str, int | str]] = [
         {"id": task.id, "title": task.title}
         for task in tasks
     ]

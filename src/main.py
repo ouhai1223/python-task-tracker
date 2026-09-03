@@ -6,7 +6,7 @@ from storage import StorageError, load_tasks, save_tasks
 from task import Task
 
 
-def get_next_task_id(tasks):
+def get_next_task_id(tasks: list[Task]) -> int:
     next_id = 1
 
     for task in tasks:
@@ -16,7 +16,7 @@ def get_next_task_id(tasks):
     return next_id
 
 
-def add_task(title):
+def add_task(title: str) -> None:
     tasks = load_tasks()
     task_id = get_next_task_id(tasks)
     task = Task(task_id, title)
@@ -27,7 +27,7 @@ def add_task(title):
     print(f"已添加任务: [{task.id}] {task.title}")
 
 
-def list_tasks():
+def list_tasks() -> None:
     tasks = load_tasks()
 
     if not tasks:
@@ -38,9 +38,9 @@ def list_tasks():
         print(f"[{task.id}] {task.title}")
 
 
-def delete_task(task_id):
+def delete_task(task_id: int) -> None:
     tasks = load_tasks()
-    task_to_delete = None
+    task_to_delete: Task | None = None
 
     for task in tasks:
         if task.id == task_id:
@@ -57,7 +57,7 @@ def delete_task(task_id):
     print(f"已删除任务: [{task_to_delete.id}] {task_to_delete.title}")
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print("用法: python .\\src\\main.py <command> [arguments]")
         return
@@ -69,8 +69,7 @@ def main():
             print("错误: add 命令需要任务标题")
             return
 
-        title = sys.argv[2]
-        title = title.strip()
+        title = sys.argv[2].strip()
         if not title:
             print("错误: 任务标题不能为空")
             return
