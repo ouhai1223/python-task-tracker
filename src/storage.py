@@ -26,15 +26,15 @@ def load_tasks() -> list[Task]:
     tasks = []
 
     for item in data:
-        task = Task(item["id"], item["title"])
+        task = Task(item["id"], item["title"], item.get("completed", False))
         tasks.append(task)
 
     return tasks
 
 
 def save_tasks(tasks: list[Task]) -> None:
-    data: list[dict[str, int | str]] = [
-        {"id": task.id, "title": task.title}
+    data: list[dict[str, int | str | bool]] = [
+        {"id": task.id, "title": task.title, "completed": task.completed }
         for task in tasks
     ]
 

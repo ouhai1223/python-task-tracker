@@ -7,3 +7,4 @@ class Task:
     """表示任务追踪器中的一个任务。"""
     id: int
     title: str
+    completed: bool = False
