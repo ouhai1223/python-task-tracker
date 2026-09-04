@@ -1,6 +1,6 @@
 # Python Task Tracker
 
-一个使用 Python 标准库实现的命令行任务追踪器，支持任务增删改、完成状态和 JSON 文件持久化。
+一个基于 Python 标准库的命令行任务管理工具，支持任务增删改、完成状态管理、状态筛选和 JSON 文件持久化。
 
 ## Features
 
@@ -16,7 +16,7 @@
 
 ## Installation
 
-准备 Python 3.12+ 和 Git。本次本地验收使用 Python 3.13.5；以下命令适用于 Windows PowerShell。
+运行要求：Python 3.12+ 和 Git。已验证环境为 Python 3.13.5、Windows PowerShell。
 
 获取项目并进入目录；已经有本地仓库时，直接进入现有目录：
 
@@ -47,24 +47,24 @@ python .\src\main.py
 
 | 操作 | 命令 |
 |---|---|
-| 添加任务 | `python .\src\main.py add "学习 Python"` |
+| 添加任务 | `python .\src\main.py add "整理项目文档"` |
 | 查看全部任务 | `python .\src\main.py list` |
 | 查看已完成任务 | `python .\src\main.py list completed` |
 | 查看未完成任务 | `python .\src\main.py list pending` |
-| 修改标题 | `python .\src\main.py update <ID> "复习 Python 文件操作"` |
+| 修改标题 | `python .\src\main.py update <ID> "完善项目文档"` |
 | 标记完成 | `python .\src\main.py complete <ID>` |
 | 删除任务 | `python .\src\main.py delete <ID>` |
 
 包含空格的标题要放在引号中。添加和更新会清除标题两端空白，并拒绝纯空白标题。筛选条件不区分大小写，例如 `list COMPLETED` 也可以使用。
 
-下面的例子会创建一条练习任务，然后修改、完成并删除它。输入 ID 时只填写刚才添加的练习任务 ID：
+以下示例依次创建、完成、更新并删除一条任务。后续操作使用该示例任务的 ID：
 
 ```powershell
-python .\src\main.py add "练习 JSON 持久化"
-$taskId = [int](Read-Host "请输入刚才输出的练习任务 ID")
+python .\src\main.py add "整理发布说明"
+$taskId = [int](Read-Host "请输入新增示例任务的 ID")
 python .\src\main.py list pending
 python .\src\main.py complete $taskId
-python .\src\main.py update $taskId "复习 JSON 持久化"
+python .\src\main.py update $taskId "完善发布说明"
 python .\src\main.py list completed
 python .\src\main.py delete $taskId
 python .\src\main.py list
@@ -73,8 +73,8 @@ python .\src\main.py list
 列表输出示例：
 
 ```text
-[1] [pending] 学习 Python
-[3] [completed] 复习 JSON 持久化
+[1] [pending] 整理项目文档
+[3] [completed] 完善发布说明
 ```
 
 `tasks.json` 不存在时，程序将其视为空任务列表；第一次成功保存时创建文件。没有符合条件的任务时显示“没有符合条件的任务”。数据路径根据源码位置确定，不会随着终端工作目录改变。
@@ -85,7 +85,7 @@ python .\src\main.py list
 [
   {
     "id": 1,
-    "title": "学习 Python",
+    "title": "整理项目文档",
     "completed": false
   }
 ]
@@ -100,7 +100,7 @@ python-task-tracker/
 │   ├── task.py          # Task dataclass：id、title、completed
 │   └── storage.py       # JSON 读取、对象转换、保存和 StorageError
 ├── tests/
-│   ├── .gitkeep         # 原有目录占位文件
+│   ├── .gitkeep         # 目录占位文件
 │   └── manual-test.md   # 可重复执行的手工验收流程和预期结果
 ├── .venv/              # 本地虚拟环境，不提交到 Git
 ├── tasks.json          # 运行时生成的任务数据，不提交到 Git
@@ -110,33 +110,30 @@ python-task-tracker/
 
 ## Verification
 
-按 [手工验收清单](tests/manual-test.md) 检查完整操作流程、错误输入和持久化边界。清单提供隔离副本的准备步骤，便于重复执行并保留原任务数据。
+[手工验收清单](tests/manual-test.md) 覆盖完整操作流程、错误输入、状态筛选、旧数据兼容和 JSON 语法损坏处理。清单提供隔离副本的准备步骤，便于重复执行并保留现有任务数据。
 
-当前仓库采用手工验收清单，没有已落盘的自动化单元测试套件。清单中记录的助手隔离验证不等同于仓库已配置 pytest 或 CI。
+当前未配置自动化单元测试或 CI。
 
 ## Implementation Notes
 
-- 用模块分工组织程序：入口处理命令，数据模型描述任务，存储模块负责文件读写。
-- `@dataclass` 可以生成初始化、对象显示和比较方法；类型标注表达设计，不会自动校验或转换输入。
-- 程序内部使用 `Task` 对象；保存时转换成字典，读取 JSON 后再恢复对象。
-- 修改内存中的属性不等于保存文件，持久化需要显式调用 `save_tasks()`。
-- 用 `item.get("completed", False)` 为旧数据提供默认状态，同时保留已有的 `True` / `False`。
-- 任务 ID 与列表下标不同；修改已有对象的属性可以保留其余字段。
-- 筛选参数中，`None` 表示全部，`True` 表示已完成，`False` 表示未完成；需要用 `is None` 区分“全部”和“未完成”。
-- CLI 检查参数数量和格式，业务函数处理查找与状态变化；`StorageError` 将 JSON 语法错误传递给入口统一提示。
-- 用正常路径、失败路径和跨进程操作检查功能；用 README 说明安装、使用方法和项目限制。
-- 使用功能分支、`git diff`、暂存区和有意义的提交记录组织修改。
+- **模块职责**：`main.py` 负责参数解析、任务操作和结果显示；`task.py` 定义数据模型；`storage.py` 负责文件读写。
+- **数据模型**：`Task` 使用 dataclass 定义 `id`、`title` 和 `completed` 字段，新任务的完成状态默认为 `False`。类型标注不执行运行时校验。
+- **持久化**：保存时将 `Task` 转换为字典列表，再通过 `json.dump()` 写入文件；加载时通过 `json.load()` 读取数据并恢复对象。
+- **数据兼容**：加载旧任务时使用 `item.get("completed", False)`，缺失的状态字段默认为未完成，已有状态保持不变。
+- **任务更新**：根据 ID 查找已有对象并修改目标属性；标题更新保留 ID 和完成状态，成功保存后输出操作结果。
+- **状态筛选**：筛选参数 `None`、`True`、`False` 分别对应全部、已完成和未完成。筛选结果用于显示，不写回数据文件。
+- **错误处理**：CLI 校验必要参数、ID 格式和标题内容，业务函数处理未找到任务与重复完成。JSON 语法错误转换为 `StorageError`，由入口捕获并输出错误提示。
 
 ## Current Limitations
 
-- 这是单用户本地文件项目，没有并发写入保护，也不提供恢复为 pending 的命令。
+- 面向单用户本地使用，没有并发写入保护，也不提供恢复为 pending 的命令。
 - ID 根据当前任务列表的最大 ID 加一生成，删除最大 ID 的任务后，该 ID 可能被后续任务复用。
 - 目前处理的是 JSON 语法损坏；合法 JSON 的字段结构、字段类型和文件权限错误尚未全面校验或统一处理。
 - 多数输入错误只打印提示并返回，退出码尚未统一为非零；捕获到 `StorageError` 时退出码为 1。`list` 会拒绝多余参数，其他命令目前只检查必要参数是否齐全。
 
 ## Development Workflow
 
-开始新工作前检查状态；当前工作提交或妥善保存后，再按需要切换主分支、同步远程并创建 `codex/` 前缀的功能分支。
+功能变更使用独立分支管理。提交前执行手工验收，并检查工作区、文件差异和格式：
 
 ```powershell
 git status
@@ -144,10 +141,11 @@ git diff
 git diff --check
 ```
 
-只暂存本次修改的文件，再用 `git diff --cached` 检查准备提交的内容。Day 6 完成源码、文档和验收后，建议提交信息为：
+暂存与本次变更相关的文件后，检查暂存区内容：
 
-```text
-feat: complete task tracker v1
+```powershell
+git diff --cached
+git diff --cached --check
 ```
 
-提交和推送是两个步骤；首次推送功能分支时设置对应的远程跟踪分支。`v1.0.0` tag 是验收后的可选版本标记。
+提交信息使用 `feat:`、`fix:`、`docs:` 等前缀描述变更类型。功能分支完成验收后合并到 `main`；版本发布时可创建 tag 标记对应提交。
